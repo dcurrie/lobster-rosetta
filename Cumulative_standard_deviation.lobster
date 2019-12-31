@@ -1,5 +1,5 @@
 
-// stats computes a running mean and variance 
+// Stats computes a running mean and variance 
 // See Knuth TAOCP vol 2, 3rd edition, page 232
 
 class Stats:
