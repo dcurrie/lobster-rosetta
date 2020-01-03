@@ -13,6 +13,10 @@
 
 // TODO: the code assumes type K supports operator `==`
 
+// TODO: Paul Khuong observes that with the appropriate hash&index function, hash values can be
+// made to resolve in-order and can be used in place of PSL
+// https://www.pvk.ca/Blog/more_numerical_experiments_in_hashing.html
+
 class RobinHoodEntry<K,V>:
     key: K
     val: V
@@ -31,6 +35,8 @@ class RobinHoodHashmap<K,V>:
 private let minsize = 16 // entries -- won't shrink below this size
 private let minload = 40 // percent -- otherwise, shrink after delete to below this load factor
 private let maxload = 85 // percent -- grow before insert if above this load factor
+
+private let validate = false
 
 private def initBuckets<K,V>(qbuckets: int, nK: K, nV: V) -> [RobinHoodEntry<K, V>]:
     let b = vector_reserve(typeof return, qbuckets)
@@ -53,6 +59,7 @@ def len<K,V>(m: RobinHoodHashmap<K,V>) -> int:
     return m.qentries
 
 private def keyToIndex<K,V>(m: RobinHoodHashmap<K,V>, key: K) -> int, int: // hash, index
+    //let h = if key is int: key else: if key is float: hash(string(key)) else: hash(key)
     let h = hash(key)
     let f = h * 11400714819323198485 // fibonacci hashing
     return h, f & ((1 << m.log2qbuc) - 1)
@@ -82,14 +89,14 @@ private def put_<K,V>(m: RobinHoodHashmap<K,V>, k: K, v: V) -> V:
             m.buckets[idx].hsh = ph
             m.buckets[idx].psl = ps
             m.qentries += 1
-            assert validate_psl(m, idx)
+            if validate: assert validate_psl(m, idx)
             return v
-        assert validate_psl(m, idx)
+        if validate: assert validate_psl(m, idx)
         if m.buckets[idx].hsh == h and m.buckets[idx].key == k: // key k already in table, replace
-            assert ph == h and pv == v // we didn't find a rich bucket yet
+            if validate: assert ph == h and pv == v // we didn't find a rich bucket yet
             pv = m.buckets[idx].val
             m.buckets[idx].val = v
-            assert m.buckets[idx].psl == ps
+            if validate: assert m.buckets[idx].psl == ps
             return pv // the old value
         if ps > m.buckets[idx].psl: // rich bucket found, swap
             let tk = pk
@@ -114,7 +121,7 @@ private def resize<K,V>(m: RobinHoodHashmap<K,V>, log2_new_size: int):
     let oldsize = m.qbuckets
     let oldents = m.qentries
     let oldbuckets = m.buckets
-    assert oldsize == oldbuckets.length
+    if validate: assert oldsize == oldbuckets.length
     let newsize = 1 << log2_new_size
     assert newsize > 0
     m.buckets = initBuckets(newsize, m.the_nil_K, m.the_nil_V)
@@ -124,14 +131,14 @@ private def resize<K,V>(m: RobinHoodHashmap<K,V>, log2_new_size: int):
     for(oldsize) i:
         if oldbuckets[i].psl >= 0:
             m.put_(oldbuckets[i].key, oldbuckets[i].val)
-    assert m.qentries == oldents
+    if validate: assert m.qentries == oldents
 
 def put<K,V>(m: RobinHoodHashmap<K,V>, k: K, v: V) -> V:
     // qe/qb > 85/100 == 100 * qe > 85 * qb
     if 100 * m.qentries > maxload * m.qbuckets:
-        print concat_string(["Resizing up: ", string(m.qentries), "/", string(m.qbuckets)], "")
+        if validate: print concat_string(["Resizing up: ", string(m.qentries), "/", string(m.qbuckets)], "")
         m.resize(m.log2qbuc + 1)
-        print concat_string(["Resized up:  ", string(m.qentries), "/", string(m.qbuckets)], "")
+        if validate: print concat_string(["Resized up:  ", string(m.qentries), "/", string(m.qbuckets)], "")
     return m.put_(k, v)
 
 def get<K,V>(m: RobinHoodHashmap<K,V>, k: K) -> V:
@@ -145,7 +152,7 @@ def get<K,V>(m: RobinHoodHashmap<K,V>, k: K) -> V:
             // which should have been captured, if the key was inserted
             // -- see the central point of the algorithm in the insertion function.
             return m.the_nil_V
-        assert validate_psl(m, idx)
+        if validate: assert validate_psl(m, idx)
         if m.buckets[idx].hsh == h and m.buckets[idx].key == k:
             return m.buckets[idx].val
         ps += 1
@@ -162,7 +169,7 @@ def del<K,V>(m: RobinHoodHashmap<K,V>, k: K) -> V:
     while probing:
         if m.buckets[idx].psl < ps: // empty or rich
             return m.the_nil_V
-        assert validate_psl(m, idx)
+        if validate: assert validate_psl(m, idx)
         if m.buckets[idx].hsh == h and m.buckets[idx].key == k:
             result = m.buckets[idx].val
             probing = false
@@ -188,15 +195,21 @@ def del<K,V>(m: RobinHoodHashmap<K,V>, k: K) -> V:
             m.buckets[idx].hsh = m.buckets[nidx].hsh
             m.buckets[idx].psl = m.buckets[nidx].psl - 1
             idx = nidx
-            assert validate_psl(m, idx)
+            if validate: assert validate_psl(m, idx)
     // see if we need to shrink // qe/qb < 40/100 == 100 * qe > 40 * qb
     if m.qbuckets > minsize and 100 * m.qentries < minload * m.qbuckets:
-        print concat_string(["Resizing dn: ", string(m.qentries), "/", string(m.qbuckets)], "")
+        if validate: print concat_string(["Resizing dn: ", string(m.qentries), "/", string(m.qbuckets)], "")
         m.resize(m.log2qbuc - 1)
-        print concat_string(["Resized dn:  ", string(m.qentries), "/", string(m.qbuckets)], "")
+        if validate: print concat_string(["Resized dn:  ", string(m.qentries), "/", string(m.qbuckets)], "")
     return result
 
 def for_each_ht<K,V>(m: RobinHoodHashmap<K,V>, fun):
     for(m.qbuckets) idx:
         if m.buckets[idx].psl >= 0:
             fun(m.buckets[idx].key, m.buckets[idx].val)
+
+// for testing...
+def for_each_ht_psl<K,V>(m: RobinHoodHashmap<K,V>, fun):
+    for(m.qbuckets) idx:
+        if m.buckets[idx].psl >= 0:
+            fun(m.buckets[idx].key, m.buckets[idx].psl)
