@@ -304,7 +304,7 @@ run_test("timed random checked rhht iterations"):
 
 run_test("timed random rhht iterations"):
     STRESS_TEST_N = 100000
-    BB_ITERATIONS = 200000
+    BB_ITERATIONS = 400000
     init_random_rhht()
     let start = seconds_elapsed()
     for(BB_ITERATIONS) i:
@@ -346,3 +346,11 @@ run_test("timed random rhht iterations"):
     //  random q: 124528 inserts, 75472 deletes, 49056 qinrhht, 49056 final size
     //  Probe sequence length 1.491356816699 average, 3.369747539348 variance,
     //    bins: [18282, 12691, 7709, 4561, 2497, 1375, 788, 461, 289, 170, 88, 54, 31, 24, 9, 11, 13, 3, 0, 0]
+    // STRESS_TEST_N = 100000
+    // BB_ITERATIONS = 400000
+    //  CPU time 2.56038 s for 400000 loops, averaging 0.00640095 ms per loop
+    //  CPU time 2.56038 s for 450020 ops, averaging 5.689480467535 µs per op
+    //  random q: 225010 inserts, 174990 deletes, 50020 qinrhht, 50020 final size
+    //  Probe sequence length 1.542522990804 average, 3.521842335037 variance,
+    //    bins: [18085, 12952, 8016, 4556, 2736, 1575, 898, 499, 274, 166, 98, 58, 31, 18, 22, 11, 8, 12, 5, 0]
+
