@@ -123,12 +123,26 @@ def bign_add(this, addend):
 // Long subtraction
 
 def bign_subtract(this, subtrahend) -> int, Bign: // overflow, result
-    if (this.digitsUsed < subtrahend.digitsUsed):
-        // TODO: compute 9s complement anyway?
-        return -1, Bign { digits: [0], digitsUsed: 0 }
-    let newDigits = map(this.digitsUsed): 0
     var borrow = 0
     var i = 0
+    if (this.digitsUsed < subtrahend.digitsUsed):
+        // overflow; compute 9s complement anyway
+        let newDigits = map(subtrahend.digitsUsed): 0
+        while i < this.digitsUsed:
+            let diff = this.digits[i] - subtrahend.digits[i] - borrow + base
+            newDigits[i] = diff % base
+            borrow = 1 - diff / base
+            i += 1
+        while i < subtrahend.digitsUsed:
+            let diff = base - subtrahend.digits[i] - borrow
+            newDigits[i] = diff % base
+            borrow = 1 - diff / base
+            i += 1
+        let bign = Bign { digits: newDigits, digitsUsed: i }
+        bign.adjustDigitsUsed()
+        assert borrow != 0
+        return borrow, bign
+    let newDigits = map(this.digitsUsed): 0
     while i < subtrahend.digitsUsed:
         let diff = this.digits[i] - subtrahend.digits[i] - borrow + base
         newDigits[i] = diff % base

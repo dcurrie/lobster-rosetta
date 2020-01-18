@@ -78,7 +78,7 @@ run_test("Bign div with r"):
     // print "corrections: " + corrections
 
 run_test("Bign sub"):
-    let TRIALS = 3000
+    let TRIALS = 300000
     for(TRIALS) i:
         let x = bign_rand()
         let y = bign_rand()
@@ -93,9 +93,16 @@ run_test("Bign sub"):
             let xb, xd = bign_subtract(x, y)
             assert 0 != xb
             //print "b: " + bign2str(x) + " - " + bign2str(y) + " = " + bign2str(xd)
+            let zb, zd = bign_subtract(x, xd)
+            //print "z: " + bign2str(x) + " - " + bign2str(xd) + " = " + bign2str(zd)
+            assert 0 != zb
+            assert 0 == bign_compare(y, zd)
         else:
             let yb, yd = bign_subtract(y, x)
             assert 0 != yb
+            let zb, zd = bign_subtract(y, yd)
+            assert 0 != zb
+            assert 0 == bign_compare(x, zd)
             let xb, xd = bign_subtract(x, y)
             assert 0 == xb
             assert 0 == bign_compare(x, bign_add(y, xd))
