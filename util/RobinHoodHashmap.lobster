@@ -41,14 +41,14 @@ private let validate = false
 private def initBuckets<K,V>(qbuckets: int, nK: K, nV: V) -> [RobinHoodEntry<K, V>]:
     let b = vector_reserve(typeof return, qbuckets)
     for (qbuckets):
-        b.push(RobinHoodEntry { key: nK, val: nV, hsh: 0, psl: -1 })
+        b.push(RobinHoodEntry<K,V> { key: nK, val: nV, hsh: 0, psl: -1 })
     return b
 
 def newRobinHoodHashmap<K,V>(log2_initial_size, nK: K, nV: V) -> RobinHoodHashmap<K,V>:
     assert log2_initial_size < 48
     let qbuckets = 1 << log2_initial_size
     assert qbuckets > 0
-    return RobinHoodHashmap { qentries: 0,
+    return RobinHoodHashmap<K,V> { qentries: 0,
                               qbuckets: qbuckets,
                               log2qbuc: log2_initial_size,
                               the_nil_K: nK,

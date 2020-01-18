@@ -3,18 +3,6 @@ import std
 import testing
 import RobinHoodHashmap
 
-class RHHM_s_i = RobinHoodHashmap<string,int>
-class RHHE_s_i = RobinHoodEntry<string,int>
-
-class RHHM_i_i = RobinHoodHashmap<int,int>
-class RHHE_i_i = RobinHoodEntry<int,int>
-
-class RHHM_i_s = RobinHoodHashmap<int,string>
-class RHHE_i_s = RobinHoodEntry<int,string>
-
-class RHHM_f_s = RobinHoodHashmap<float,string>
-class RHHE_f_s = RobinHoodEntry<float,string>
-
 let MAXINT = 9223372036854775807
 let MARKER = (-MAXINT) - 1
 
