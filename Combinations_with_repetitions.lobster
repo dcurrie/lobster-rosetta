@@ -6,7 +6,7 @@ def choose(s, k, f):
     let got = map(k): s[0]
     let n = s.length
 
-    def choosi(n_chosen, at):
+    def choosi(n_chosen, at) -> int:
         var count = 0
         if n_chosen == k:
             f(got)

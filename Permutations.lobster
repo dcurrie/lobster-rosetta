@@ -8,7 +8,7 @@ def permr(s, f):
     if s.length == 0:
         f(s)
         return
-    def rc(np: int):
+    def rc(np: int) -> void:
         if np == 1:
             f(s)
             return
@@ -31,7 +31,7 @@ def permr(s, f):
 // Heap's recursive method https://en.wikipedia.org/wiki/Heap%27s_algorithm
 
 def permh(s, f):
-    def rc(k: int):
+    def rc(k: int) -> void:
         if k <= 1:
             f(s)
         else:
