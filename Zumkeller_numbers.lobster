@@ -43,7 +43,7 @@ def printZumkellers(q: int, oddonly: bool):
     var nprinted = 0
     var res = ""
     for(100000) n:
-        if (!oddonly or n % 2 != 0):
+        if ((not oddonly) or n % 2 != 0):
             if isZumkeller(n):
                 let s = string(n)
                 let z = length(s)
